@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>eMarketplace</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #f7f8fa; }
+        .header { background-color: #7b61ff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .nav-btn { background-color: white; color: #7b61ff; padding: 8px 20px; border: none; border-radius: 4px; text-decoration: none; font-weight: bold; cursor: pointer; }
+        .main-content { padding: 4px 50px 40px 50px; max-width: 1200px; margin: 0 auto; }
+        .stats { color: #888; font-size: 14px; margin-bottom: 20px; margin-top: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .card { background-color: white; border-radius: 8px; border: 1px solid #eef0f4; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); display: flex; flex-direction: column; cursor: pointer; }
+        .img-container { width: 100%; height: 200px; background-color: #f0f0f0; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .title { font-weight: bold; margin-top: 15px; margin-bottom: 5px; font-size: 16px; color: #333; }
+        .price { color: #7b61ff; font-weight: bold; font-size: 15px; }
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 40px; }
+        .page-btn { background-color: #7b61ff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .page-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+        .current-page { font-size: 16px; font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>eMarketplace</h1>
+    <a href="new-item.html" class="nav-btn">New</a>
+</div>
+
+<div class="main-content">
+    <div class="stats" id="totalCount">0 items in total</div>
+    <div class="grid" id="itemsGrid"></div>
+
+    <div class="pagination">
+        <button class="page-btn" id="prevBtn" onclick="changePage(-1)">&lt;</button>
+        <span class="current-page" id="pageNumber">1</span>
+        <button class="page-btn" id="nextBtn" onclick="changePage(1)">&gt;</button>
+    </div>
+</div>
+
+<script>
+    let currentPage = 0;
+
+    function loadItems() {
+        fetch('/items?page=' + currentPage)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('totalCount').innerText = data.totalElements + ' items in total';
+            document.getElementById('pageNumber').innerText = (currentPage + 1);
+
+            document.getElementById('prevBtn').disabled = data.first;
+            document.getElementById('nextBtn').disabled = data.last;
+
+            const grid = document.getElementById('itemsGrid');
+            grid.innerHTML = '';
+
+            data.content.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => window.location.href = 'item.html?id=' + item.id;
+
+                card.innerHTML = `
+                    <div class="img-container">
+                        <img src="${item.photoUrl}" alt="Item image">
+                    </div>
+                    <div class="title">${item.name}</div>
+                    <div class="price">${item.price}$</div>
+                `;
+                grid.appendChild(card);
+            });
+        });
+    }
+
+    function changePage(direction) {
+        currentPage += direction;
+        loadItems();
+    }
+
+    window.onload = loadItems;
+</script>
+
+</body>
+</html>
