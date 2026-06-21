@@ -5,48 +5,40 @@
     <title>Item View</title>
     <style>
         body { margin: 0; font-family: Arial, sans-serif; background-color: #f7f8fa; }
-        .header { background-color: #7b61ff; padding: 15px 30px; color: white; }
-        .header h1 { margin: 0; font-size: 24px; }
-        .header a { text-decoration: none; color: white; }
+        .header { background-color: #7b61ff; padding: 15px 30px; }
+        .header a { text-decoration: none; color: white; font-size: 24px; font-weight: bold; }
         .content-container { max-width: 700px; margin: 40px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-        .image-box { width: 100%; max-height: 400px; background-color: #fafafa; overflow: hidden; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
-        .image-box img { width: 100%; height: auto; object-fit: contain; }
-        .details-row { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 20px; }
-        .title { font-size: 22px; font-weight: bold; color: #333; }
+        .image-box { width: 100%; max-height: 400px; background-color: #fafafa; display: flex; align-items: center; justify-content: center; }
+        .image-box img { max-width: 100%; max-height: 400px; }
+        .details-row { display: flex; justify-content: space-between; margin-top: 20px; }
+        .title { font-size: 22px; font-weight: bold; }
         .price { font-size: 22px; font-weight: bold; color: #7b61ff; }
         .time { font-size: 13px; color: #aaa; margin-top: 5px; }
-        .description { margin-top: 25px; line-height: 1.6; color: #444; font-size: 15px; border-top: 1px solid #eee; padding-top: 15px; word-wrap: break-word; }
+        .user-tag { margin-top: 10px; font-size: 14px; font-weight: bold; color: #555; }
+        .description { margin-top: 25px; line-height: 1.6; border-top: 1px solid #eee; padding-top: 15px; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <a href="index.html"><h1>eMarketplace</h1></a>
-</div>
+<div class="header"><a href="index.html">eMarketplace</a></div>
 
 <div class="content-container">
-    <div class="image-box">
-        <img id="itemPhoto" src="" alt="Item Image">
-    </div>
+    <div class="image-box"><img id="itemPhoto"></div>
     <div class="details-row">
         <div>
             <div class="title" id="itemTitle">Loading...</div>
-            <div class="time" id="itemTime">2024-00-00 00:00</div>
+            <div class="user-tag" id="itemUser"></div>
+            <div class="time" id="itemTime"></div>
         </div>
-        <div class="price" id="itemPrice">0$</div>
+        <div class="price" id="itemPrice"></div>
     </div>
     <div class="description" id="itemDescription"></div>
 </div>
 
 <script>
-    window.onload = function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const id = urlParams.get('id');
-
-        if(!id) {
-            window.location.href = 'index.html';
-            return;
-        }
+    window.onload = () => {
+        const id = new URLSearchParams(window.location.search).get('id');
+        if(!id) return window.location.href = 'index.html';
 
         fetch('/items/' + id)
         .then(res => res.json())
@@ -55,19 +47,16 @@
             document.getElementById('itemTitle').innerText = item.name;
             document.getElementById('itemPrice').innerText = item.price + '$';
             document.getElementById('itemDescription').innerText = item.description;
+            document.getElementById('itemUser').innerText = "Posted by: " + (item.username || "Unknown");
 
             if(item.submissionTime) {
-                const date = new Date(item.submissionTime);
-                const formattedDate = date.getFullYear() + '-' +
-                    String(date.getMonth() + 1).padStart(2, '0') + '-' +
-                    String(date.getDate()).padStart(2, '0') + ' ' +
-                    String(date.getHours()).padStart(2, '0') + ':' +
-                    String(date.getMinutes()).padStart(2, '0');
-                document.getElementById('itemTime').innerText = formattedDate;
+                const d = new Date(item.submissionTime);
+                document.getElementById('itemTime').innerText = d.getFullYear() + '-' +
+                    String(d.getMonth()+1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + ' ' +
+                    String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
             }
         });
     }
 </script>
-
 </body>
 </html>

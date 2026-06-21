@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/items")
@@ -19,8 +20,10 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ItemResponseDto>> getAllItems(@RequestParam(defaultValue = "0") int page) {
-        return ResponseEntity.ok(itemService.getItems(page));
+    public ResponseEntity<Page<ItemResponseDto>> getAllItems(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "dateDesc") String sort) {
+        return ResponseEntity.ok(itemService.getItems(page, sort));
     }
 
     @GetMapping("/{id}")
@@ -32,8 +35,9 @@ public class ItemController {
     public ResponseEntity<?> addItem(@RequestParam("name") String name,
                                      @RequestParam("price") Double price,
                                      @RequestParam("description") String description,
-                                     @RequestParam("photo") MultipartFile photo) {
-        itemService.createItem(name, price, description, photo);
+                                     @RequestParam("photo") MultipartFile photo,
+                                     @RequestParam("userId") UUID userId) {
+        itemService.createItem(name, price, description, photo, userId);
         return ResponseEntity.ok().build();
     }
 }

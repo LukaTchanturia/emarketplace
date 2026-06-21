@@ -2,7 +2,9 @@ package com.example.emarketplace.service;
 
 import com.example.emarketplace.dto.ItemResponseDto;
 import com.example.emarketplace.entity.Item;
+import com.example.emarketplace.entity.User;
 import com.example.emarketplace.repository.ItemRepository;
+import com.example.emarketplace.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -17,10 +19,12 @@ import java.util.UUID;
 public class ItemService {
 
     private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
     private final Path root = Paths.get("uploads");
 
-    public ItemService(ItemRepository itemRepository) {
+    public ItemService(ItemRepository itemRepository, UserRepository userRepository) {
         this.itemRepository = itemRepository;
+        this.userRepository = userRepository;
         try {
             Files.createDirectories(root);
         } catch (IOException e) {
@@ -28,8 +32,19 @@ public class ItemService {
         }
     }
 
-    public Page<ItemResponseDto> getItems(int page) {
-        PageRequest pageRequest = PageRequest.of(page, 6, Sort.by("submissionTime").descending());
+    public Page<ItemResponseDto> getItems(int page, String sortParam) {
+        Sort sort;
+        if ("dateAsc".equals(sortParam)) {
+            sort = Sort.by("submissionTime").ascending();
+        } else if ("priceAsc".equals(sortParam)) {
+            sort = Sort.by("price").ascending();
+        } else if ("priceDesc".equals(sortParam)) {
+            sort = Sort.by("price").descending();
+        } else {
+            sort = Sort.by("submissionTime").descending();
+        }
+
+        PageRequest pageRequest = PageRequest.of(page, 6, sort);
         return itemRepository.findAll(pageRequest).map(this::convertToDto);
     }
 
@@ -38,7 +53,9 @@ public class ItemService {
         return convertToDto(item);
     }
 
-    public void createItem(String name, Double price, String description, MultipartFile file) {
+    public void createItem(String name, Double price, String description, MultipartFile file, UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException());
+
         String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         try {
             Files.copy(file.getInputStream(), this.root.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
@@ -52,6 +69,7 @@ public class ItemService {
         item.setDescription(description);
         item.setSubmissionTime(LocalDateTime.now());
         item.setPhotoUrl("/uploads/" + filename);
+        item.setUser(user);
         itemRepository.save(item);
     }
 
@@ -63,6 +81,9 @@ public class ItemService {
         dto.setDescription(item.getDescription());
         dto.setSubmissionTime(item.getSubmissionTime());
         dto.setPhotoUrl(item.getPhotoUrl());
+        if (item.getUser() != null) {
+            dto.setUsername(item.getUser().getUsername());
+        }
         return dto;
     }
 }

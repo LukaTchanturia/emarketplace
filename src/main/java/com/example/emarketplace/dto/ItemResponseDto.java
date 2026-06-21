@@ -10,6 +10,7 @@ public class ItemResponseDto {
     private String description;
     private LocalDateTime submissionTime;
     private String photoUrl;
+    private String username;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -23,4 +24,6 @@ public class ItemResponseDto {
     public void setSubmissionTime(LocalDateTime submissionTime) { this.submissionTime = submissionTime; }
     public String getPhotoUrl() { return photoUrl; }
     public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 }

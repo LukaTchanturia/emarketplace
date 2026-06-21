@@ -17,6 +17,10 @@ public class Item {
     private LocalDateTime submissionTime;
     private String photoUrl;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
@@ -29,4 +33,6 @@ public class Item {
     public void setSubmissionTime(LocalDateTime submissionTime) { this.submissionTime = submissionTime; }
     public String getPhotoUrl() { return photoUrl; }
     public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 }
